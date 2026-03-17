@@ -15,12 +15,8 @@ class Game():
     def __init__(self):
         self.player_turn = None
         self.game_board = [[0,0,0],
-                            [0,0,0],
+                            [0,1,0],
                             [0,0,0]]
-        
-    
-    def possible_moves(self):
-        pass
 
     def draw(self, screen): 
         screen.fill((255,255,255))
@@ -28,6 +24,13 @@ class Game():
         pygame.draw.line(screen, 'black', (480,150), (480,650), 5)
         pygame.draw.line(screen, 'black', (150,315), (650,315), 5)
         pygame.draw.line(screen, 'black', (150,480), (650,480), 5)
+
+    def is_possible_move(self, coord):
+        print(self.game_board[coord[0]][coord[1]])
+        if self.game_board[coord[0]][coord[1]] == 0: return True
+        else: return False
+        
+
 
 
 
@@ -48,7 +51,7 @@ def run_game():
     rect7 = pygame.draw.rect(screen, [255, 0, 0], [160, 490, 145, 145])
     rect8 = pygame.draw.rect(screen, [255, 0, 0], [325, 490, 145, 145])
     rect9 = pygame.draw.rect(screen, [255, 0, 0], [490, 490, 145, 145])
-    rects = [rect1, rect2, rect3, rect4, rect5, rect6, rect8, rect9]
+    rects = [rect1, rect2, rect3, rect4, rect5, rect6, rect7, rect8, rect9]
 
     game=Game()
     player1 = Player('cross')
@@ -65,13 +68,18 @@ def run_game():
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 pos = pygame.mouse.get_pos()
                 clicked = next((r for r in rects if r.collidepoint(pos)), None)
-                if clicked:
+                y = (pos[0] + 50) // 165 - 1
+                x = (pos[1] + 50) // 165 - 1
+                print((x,y))
+                if clicked and game.is_possible_move((x,y)):
+                    
                     print("cliqué !")
+                    
 
         game.draw(screen)
         pygame.draw.line(screen, 'black', (160,160), (305,305), 5)
         pygame.draw.line(screen, 'black', (305,160), (160,305), 5)
-        pygame.draw.rect(screen, [255, 0, 0], [490, 490, 145, 145])
+        pygame.draw.rect(screen, [255, 0, 0], [160, 490, 145, 145])
         pygame.display.update()
 
 def main():
