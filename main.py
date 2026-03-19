@@ -26,9 +26,10 @@ class Game():
         pygame.draw.line(screen, 'black', (150,480), (650,480), 5)
 
     def is_possible_move(self, coord):
-        print(self.game_board[coord[0]][coord[1]])
-        if self.game_board[coord[0]][coord[1]] == 0: return True
-        else: return False
+        try :
+            if self.game_board[coord[0]][coord[1]] == 0: return True
+            else: return False
+        except: pass
         
 
 
@@ -70,16 +71,10 @@ def run_game():
                 clicked = next((r for r in rects if r.collidepoint(pos)), None)
                 y = (pos[0] + 50) // 165 - 1
                 x = (pos[1] + 50) // 165 - 1
-                print((x,y))
                 if clicked and game.is_possible_move((x,y)):
                     
                     print("cliqué !")
                     
-
-        game.draw(screen)
-        pygame.draw.line(screen, 'black', (160,160), (305,305), 5)
-        pygame.draw.line(screen, 'black', (305,160), (160,305), 5)
-        pygame.draw.rect(screen, [255, 0, 0], [160, 490, 145, 145])
         pygame.display.update()
 
 def main():
