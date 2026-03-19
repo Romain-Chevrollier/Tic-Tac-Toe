@@ -9,15 +9,6 @@ class Player():
         self.type = 'Human'
         self.shape = shape
 
-def draw_shape(player, screen, rect):
-    if player.shape == "circle":
-        pygame.draw.circle(screen, "black", rect.center, 40)
-        pygame.draw.circle(screen, "white", rect.center, 30)
-    else: 
-        pygame.draw.line(screen, 'black', rect.topleft, rect.bottomright, 10)
-        pygame.draw.line(screen, 'black', rect.topright, rect.bottomleft, 10)
-
-        
 
 class Game():
     def __init__(self):
@@ -41,10 +32,25 @@ class Game():
         
 
 
+def draw_shape(player, screen, rect):
+    if player.shape == "circle":
+        pygame.draw.circle(screen, "black", rect.center, 70)
+        pygame.draw.circle(screen, "white", rect.center, 60)
+    else: 
+        pygame.draw.line(screen, 'black', rect.topleft, rect.bottomright, 10)
+        pygame.draw.line(screen, 'black', rect.topright, rect.bottomleft, 10)
 
+def display_player_turn(player, screen):
+    display_player_surface = test_font.render(f'Player turn : {player.shape}', False, (0,0,0))
+    display_player_rectangle = display_player_surface.get_rect(center=(400,50))
+    padding = 10
+    bg_rect = display_player_rectangle.inflate(padding * 2, padding * 2)
+    pygame.draw.rect(screen, (255,255,255), bg_rect)
+    screen.blit(display_player_surface, display_player_rectangle)
 
 
 def run_game():
+    global test_font
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('Tic-Tac-Toe')
@@ -67,7 +73,7 @@ def run_game():
     player2 = Player('circle')
 
     game.draw(screen)
-
+    game.player_turn = player1
 
 
     while True:
@@ -75,15 +81,22 @@ def run_game():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
                 clicked = next((r for r in rects if r.collidepoint(pos)), None)
                 y = (pos[0] + 50) // 165 - 1
                 x = (pos[1] + 50) // 165 - 1
                 if clicked and game.is_possible_move((x,y)):
-                    game.game_board[x][y] = 1
-                    draw_shape(player1, screen, clicked)
-                    print("cliqué !")
+
+                    draw_shape(game.player_turn, screen, clicked)
+                    if game.player_turn == player1: 
+                        game.game_board[x][y] = 1
+                        game.player_turn = player2
+                    else : 
+                        game.game_board[x][y] = 2
+                        game.player_turn = player1
+                    
+        display_player_turn(game.player_turn, screen)
                     
         pygame.display.update()
 
