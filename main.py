@@ -9,13 +9,21 @@ class Player():
         self.type = 'Human'
         self.shape = shape
 
+def draw_shape(player, screen, rect):
+    if player.shape == "circle":
+        pygame.draw.circle(screen, "black", rect.center, 40)
+        pygame.draw.circle(screen, "white", rect.center, 30)
+    else: 
+        pygame.draw.line(screen, 'black', rect.topleft, rect.bottomright, 10)
+        pygame.draw.line(screen, 'black', rect.topright, rect.bottomleft, 10)
+
         
 
 class Game():
     def __init__(self):
         self.player_turn = None
         self.game_board = [[0,0,0],
-                            [0,1,0],
+                            [0,0,0],
                             [0,0,0]]
 
     def draw(self, screen): 
@@ -58,6 +66,7 @@ def run_game():
     player1 = Player('cross')
     player2 = Player('circle')
 
+    game.draw(screen)
 
 
 
@@ -72,7 +81,8 @@ def run_game():
                 y = (pos[0] + 50) // 165 - 1
                 x = (pos[1] + 50) // 165 - 1
                 if clicked and game.is_possible_move((x,y)):
-                    
+                    game.game_board[x][y] = 1
+                    draw_shape(player1, screen, clicked)
                     print("cliqué !")
                     
         pygame.display.update()
