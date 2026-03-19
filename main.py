@@ -1,4 +1,5 @@
 import pygame
+# TODO regle gagner perdre
 # TODO save score 
 # TODO random player start
 # TODO play against AI ?
@@ -9,6 +10,21 @@ class Player():
         self.type = 'Human'
         self.shape = shape
 
+    def draw_shape(self, screen, rect):
+        if self.shape == "circle":
+            pygame.draw.circle(screen, "black", rect.center, 70)
+            pygame.draw.circle(screen, "white", rect.center, 60)
+        else: 
+            pygame.draw.line(screen, 'black', rect.topleft, rect.bottomright, 10)
+            pygame.draw.line(screen, 'black', rect.topright, rect.bottomleft, 10)
+
+    def display_player_turn(self, screen):
+        display_player_surface = test_font.render(f'Player turn : {self.shape}', False, (0,0,0))
+        display_player_rectangle = display_player_surface.get_rect(center=(400,50))
+        padding = 10
+        bg_rect = display_player_rectangle.inflate(padding * 2, padding * 2)
+        pygame.draw.rect(screen, (255,255,255), bg_rect)
+        screen.blit(display_player_surface, display_player_rectangle)
 
 class Game():
     def __init__(self):
@@ -29,24 +45,27 @@ class Game():
             if self.game_board[coord[0]][coord[1]] == 0: return True
             else: return False
         except: pass
-        
-
-
-def draw_shape(player, screen, rect):
-    if player.shape == "circle":
-        pygame.draw.circle(screen, "black", rect.center, 70)
-        pygame.draw.circle(screen, "white", rect.center, 60)
-    else: 
-        pygame.draw.line(screen, 'black', rect.topleft, rect.bottomright, 10)
-        pygame.draw.line(screen, 'black', rect.topright, rect.bottomleft, 10)
-
-def display_player_turn(player, screen):
-    display_player_surface = test_font.render(f'Player turn : {player.shape}', False, (0,0,0))
-    display_player_rectangle = display_player_surface.get_rect(center=(400,50))
-    padding = 10
-    bg_rect = display_player_rectangle.inflate(padding * 2, padding * 2)
-    pygame.draw.rect(screen, (255,255,255), bg_rect)
-    screen.blit(display_player_surface, display_player_rectangle)
+    
+    def game_end(self):
+        winning_combos = [
+            # Lignes
+            [(0,0), (0,1), (0,2)],
+            [(1,0), (1,1), (1,2)],
+            [(2,0), (2,1), (2,2)],
+            # Colonnes
+            [(0,0), (1,0), (2,0)],
+            [(0,1), (1,1), (2,1)],
+            [(0,2), (1,2), (2,2)],
+            # Diagonales
+            [(0,0), (1,1), (2,2)],
+            [(0,2), (1,1), (2,0)],
+        ]
+        for combo in winning_combos:
+            symbols = [self.game_board[r][c] for r, c in combo]
+            if symbols[0] != 0 and len(set(symbols)) == 1:
+                return symbols[0]  # gagnant trouvé
+        if all(self.game_board[r][c] != 0 for r in range(3) for c in range(3)):
+            return 3
 
 
 def run_game():
@@ -74,30 +93,45 @@ def run_game():
 
     game.draw(screen)
     game.player_turn = player1
-
+    game_active = True
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                pos = pygame.mouse.get_pos()
-                clicked = next((r for r in rects if r.collidepoint(pos)), None)
-                y = (pos[0] + 50) // 165 - 1
-                x = (pos[1] + 50) // 165 - 1
-                if clicked and game.is_possible_move((x,y)):
+            if game_active:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    pos = pygame.mouse.get_pos()
+                    clicked = next((r for r in rects if r.collidepoint(pos)), None)
+                    y = (pos[0] + 50) // 165 - 1
+                    x = (pos[1] + 50) // 165 - 1
+                    if clicked and game.is_possible_move((x,y)):
+                        game.player_turn.draw_shape(screen, clicked)
+                        if game.player_turn == player1: 
+                            game.game_board[x][y] = 1
+                            game.player_turn = player2
+                        else : 
+                            game.game_board[x][y] = 2
+                            game.player_turn = player1
 
-                    draw_shape(game.player_turn, screen, clicked)
-                    if game.player_turn == player1: 
-                        game.game_board[x][y] = 1
-                        game.player_turn = player2
-                    else : 
-                        game.game_board[x][y] = 2
-                        game.player_turn = player1
-                    
-        display_player_turn(game.player_turn, screen)
-                    
+                        if game.game_end():
+                            game_active=False
+
+        if not game_active:
+            if game.game_end() == 1:  winner = "Croix"
+            elif game.game_end() == 2: winner = "Cercle"
+            else: winner = "None"
+            screen.fill("white")
+            display_player_surface = test_font.render(f'The winner is : {winner}', False, (0,0,0))
+            display_player_rectangle = display_player_surface.get_rect(center=(400,300))
+            screen.blit(display_player_surface, display_player_rectangle)
+
+            
+
+        else:
+            game.player_turn.display_player_turn(screen)
+
         pygame.display.update()
 
 def main():
