@@ -1,5 +1,4 @@
 import pygame
-# TODO regle gagner perdre
 # TODO save score 
 # TODO random player start
 # TODO play against AI ?
@@ -29,6 +28,7 @@ class Player():
 class Game():
     def __init__(self):
         self.player_turn = None
+        self.game_active = True
         self.game_board = [[0,0,0],
                             [0,0,0],
                             [0,0,0]]
@@ -66,6 +66,12 @@ class Game():
                 return symbols[0]  # gagnant trouvé
         if all(self.game_board[r][c] != 0 for r in range(3) for c in range(3)):
             return 3
+        
+    def game_reset(self, screen):
+        self.game_active = True
+        self.draw(screen)
+        self.game_board = [[0]*3 for _ in range(3)]
+
 
 
 def run_game():
@@ -93,14 +99,14 @@ def run_game():
 
     game.draw(screen)
     game.player_turn = player1
-    game_active = True
+    # game_active = True
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if game_active:
+            if game.game_active:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     pos = pygame.mouse.get_pos()
                     clicked = next((r for r in rects if r.collidepoint(pos)), None)
@@ -116,16 +122,28 @@ def run_game():
                             game.player_turn = player1
 
                         if game.game_end():
-                            game_active=False
+                            game.game_active=False
 
-        if not game_active:
+            if not game.game_active:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: 
+                    game.game_reset(screen)
+
+        if not game.game_active:
             if game.game_end() == 1:  winner = "Croix"
             elif game.game_end() == 2: winner = "Cercle"
             else: winner = "None"
-            screen.fill("white")
-            display_player_surface = test_font.render(f'The winner is : {winner}', False, (0,0,0))
-            display_player_rectangle = display_player_surface.get_rect(center=(400,300))
-            screen.blit(display_player_surface, display_player_rectangle)
+            # screen.fill("white")
+            display_winner_surface = test_font.render(f'The winner is : {winner}', False, (39, 197, 58))
+            display_winner_rectangle = display_winner_surface.get_rect(center=(400,50))
+            padding = 10
+            bg_rect = display_winner_rectangle.inflate(padding * 2, padding * 2)
+            pygame.draw.rect(screen, (255,255,255), bg_rect)
+            screen.blit(display_winner_surface, display_winner_rectangle)
+
+            display_restart_surface = test_font.render(f'Press space to restart', False, (210, 2, 0))
+            display_restart_rectangle = display_restart_surface.get_rect(center=(400,730))
+            screen.blit(display_restart_surface, display_restart_rectangle)
+
 
             
 
